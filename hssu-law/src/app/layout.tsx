@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { FIRM_CONTACT_EMAIL } from "@/lib/contact";
 import "./globals.css";
 
 const inter = Inter({
@@ -62,6 +63,7 @@ const jsonLd = {
     addressCountry: "US",
   },
   areaServed: { "@type": "City", name: "Los Angeles" },
+  email: FIRM_CONTACT_EMAIL,
 };
 
 export default function RootLayout({

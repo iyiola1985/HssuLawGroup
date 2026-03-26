@@ -42,4 +42,6 @@ If **Root Directory** is left as the repository root, Vercel will not find `pack
 
 **Important:** The app must be committed as **normal files** inside `hssu-law`, not only as a Git submodule pointer. Submodules often clone empty on Vercel unless everything is configured with extra URLs and access.
 
+**Contact form email:** set `RESEND_API_KEY` in Vercel (see `.env.example`). Messages are delivered to `contact@angelahssulawfirm.pro`. After verifying your domain in [Resend](https://resend.com), set `CONTACT_FROM_EMAIL` to an address on that domain.
+
 See [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

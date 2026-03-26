@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContactEmailBadge } from "@/components/site/ContactEmailBadge";
 
 const quickLinks = [
   { href: "#about", label: "About" },
@@ -21,6 +22,7 @@ export function Footer() {
             <br />
             Los Angeles, CA 90071
           </address>
+          <ContactEmailBadge variant="footer" />
         </div>
         <nav aria-label="Footer">
           <p className="text-xs font-semibold uppercase tracking-wider text-white/45">

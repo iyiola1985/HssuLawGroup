@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { easeSmooth } from "@/lib/motion";
 import { MapPin } from "lucide-react";
+import { ContactEmailBadge } from "@/components/site/ContactEmailBadge";
+import { FIRM_CONTACT_EMAIL } from "@/lib/contact";
 
 const addressLines = [
   "Angela W Hssu & Associates Immigration Law",
@@ -16,10 +18,48 @@ const mapsEmbedSrc =
 
 export function Contact() {
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
+    setError(null);
+    setSubmitting(true);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const payload = {
+      name: fd.get("name"),
+      email: fd.get("email"),
+      message: fd.get("message"),
+      _honeypot: fd.get("website"),
+    };
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!res.ok) {
+        setError(
+          data.error ??
+            "Something went wrong. Please try again or email us directly.",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      setSent(true);
+      form.reset();
+    } catch {
+      setError("Network error. Please try again or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -46,8 +86,10 @@ export function Contact() {
             Schedule a consultation
           </h2>
           <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
-            Share a brief summary of your matter. We will respond as soon as
-            possible. This form does not create an attorney–client relationship.
+            Share a brief summary of your matter, or write to us at{" "}
+            <span className="font-medium text-gold/95">{FIRM_CONTACT_EMAIL}</span>
+            . We will respond as soon as possible. Submitting this form does not
+            create an attorney–client relationship.
           </p>
         </motion.div>
 
@@ -72,6 +114,10 @@ export function Contact() {
                   </span>
                 ))}
               </address>
+            </div>
+
+            <div className="mt-8">
+              <ContactEmailBadge variant="dark" />
             </div>
 
             <div className="mt-8 overflow-hidden rounded-sm ring-1 ring-white/10">
@@ -102,15 +148,32 @@ export function Contact() {
                   Thank you for reaching out.
                 </p>
                 <p className="mt-3 max-w-sm text-sm text-white/75">
-                  Your message has been noted. Please call our office if your
-                  matter is urgent.
+                  Your message has been sent. We will reply as soon as we can.
+                  For urgent matters, email{" "}
+                  <a
+                    href={`mailto:${FIRM_CONTACT_EMAIL}`}
+                    className="font-medium text-gold underline decoration-gold/40 underline-offset-2 hover:decoration-gold"
+                  >
+                    {FIRM_CONTACT_EMAIL}
+                  </a>
+                  .
                 </p>
               </div>
             ) : (
               <form
                 onSubmit={handleSubmit}
-                className="glass-dark space-y-6 rounded-sm p-8 sm:p-10"
+                className="relative glass-dark space-y-6 rounded-sm p-8 sm:p-10"
               >
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden
+                  title="Do not fill"
+                  className="absolute -left-[10000px] h-px w-px opacity-0"
+                />
+
                 <div>
                   <label
                     htmlFor="name"
@@ -124,7 +187,8 @@ export function Contact() {
                     type="text"
                     required
                     autoComplete="name"
-                    className="mt-2 w-full rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2 disabled:opacity-50"
                     placeholder="Your full name"
                   />
                 </div>
@@ -141,7 +205,8 @@ export function Contact() {
                     type="email"
                     required
                     autoComplete="email"
-                    className="mt-2 w-full rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2"
+                    disabled={submitting}
+                    className="mt-2 w-full rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2 disabled:opacity-50"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -157,15 +222,27 @@ export function Contact() {
                     name="message"
                     required
                     rows={5}
-                    className="mt-2 w-full resize-y rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2"
+                    disabled={submitting}
+                    className="mt-2 w-full resize-y rounded-sm border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none ring-gold/40 transition-[box-shadow,border-color] focus:border-gold/50 focus:ring-2 disabled:opacity-50"
                     placeholder="Briefly describe your immigration matter…"
                   />
                 </div>
+
+                {error ? (
+                  <p
+                    role="alert"
+                    className="text-sm font-medium text-red-300/95"
+                  >
+                    {error}
+                  </p>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="jq-glow w-full rounded-sm bg-gold py-4 text-sm font-semibold tracking-wide text-navy transition-transform hover:-translate-y-0.5"
+                  disabled={submitting}
+                  className="jq-glow w-full rounded-sm bg-gold py-4 text-sm font-semibold tracking-wide text-navy transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60"
                 >
-                  Send message
+                  {submitting ? "Sending…" : "Send message"}
                 </button>
               </form>
             )}
