@@ -7,7 +7,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { easeSmooth } from "@/lib/motion";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=2400";
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=2400";
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
